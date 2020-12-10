@@ -1,6 +1,6 @@
 # Table of contents
 
-* [Introduction](README.md)
+* [ReadMe](README.md)
 * [Intro](intro.md)
 * [Hadoop](hadoop.md)
 * [HDFS](hdfs.md)
