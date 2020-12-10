@@ -1,6 +1,6 @@
 # Table of contents
 
-* [Intro](README.md)
+* [Intro](intro.md)
 * [Hadoop](hadoop.md)
 * [HDFS](hdfs.md)
 * [YARN and MapReduce](yarn.md)
