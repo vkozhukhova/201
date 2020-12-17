@@ -17,4 +17,6 @@
 * [Spark Streaming part 2](streaming201.md)
 * [ElasticSearch](elastic.md)
 * [Kibana visualizations](kibana.md)
+* [HBase](hbase.md)
+* [Cassandra](cassandra.md)
 
