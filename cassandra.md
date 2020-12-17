@@ -289,34 +289,33 @@ endpoint_snitch: SimpleSnitch
 ## Types of snitches
 
 1. DseSimpleSnitch (default)
-- only for development deployments. 
-- does not recognize datacenter or rack information. 
+    - only for development deployments. 
+	- does not recognize datacenter or rack information. 
 2. GossipingPropertyFileSnitch
-- is recommended for production. 
-- It uses rack and datacenter information for the local node defined in the cassandra-rackdc.properties file and propagates this information to other nodes via gossip. 
+	- is recommended for production. 
+	- It uses rack and datacenter information for the local node defined in the cassandra-rackdc.properties file and propagates this information to other nodes via gossip. 
 7. PropertyFileSnitch
-- determines proximity as determined by rack and datacenter. 
-- It uses the network details located in the cassandra-topology.properties file. 
-- define datacenter names using a standard convention, and make sure that the datacenter names correlate to the name of your datacenters in the keyspace definition. 
-- Every node in the cluster should be described in the cassandra-topology.properties file, which must be exactly the same on every node in the cluster.
+	- determines proximity as determined by rack and datacenter. 
+	- It uses the network details located in the cassandra-topology.properties file. 
+	- define datacenter names using a standard convention, and make sure that the datacenter names correlate to the name of your datacenters in the keyspace definition. 
+	- Every node in the cluster should be described in the cassandra-topology.properties file, which must be exactly the same on every node in the cluster.
 8. RackInferringSnitch
-- determines the proximity of nodes by datacenter and rack, which are assumed to correspond to the second and third octet of the node's IP address, respectively. It is best used as an example for writing a custom snitch class
-110.100.200.105, where 100 - datacenter octet, 200 - rack octet, 105 - node octet
+	- determines the proximity of nodes by datacenter and rack, which are assumed to correspond to the second and third octet of the node's IP address, respectively. It is best used as an example for writing a custom snitch class
+	- 110.100.200.105, where 100 - datacenter octet, 200 - rack octet, 105 - node octet
 3. Ec2Snitch
-- for simple cluster deployments on Amazon EC2 where all nodes in the cluster are within a single region.
-- In EC2 deployments, the region name is treated as the datacenter name, and availability zones are treated as racks within a datacenter. 
-- if a node is in the us-east-1 region, us-east is the datacenter name and 1 is the rack location. (Racks are important for distributing replicas, but not for datacenter naming.) 
-- Because private IPs are used, this snitch does not work across multiple regions. 
+	- for simple cluster deployments on Amazon EC2 where all nodes in the cluster are within a single region.
+	- In EC2 deployments, the region name is treated as the datacenter name, and availability zones are treated as racks within a datacenter. 
+	- if a node is in the us-east-1 region, us-east is the datacenter name and 1 is the rack location. (Racks are important for distributing replicas, but not for datacenter naming.) 
+	- Because private IPs are used, this snitch does not work across multiple regions. 
 4. Ec2MultiRegionSnitch
-- for deployments on Amazon EC2 where the cluster spans multiple regions.
+	- for deployments on Amazon EC2 where the cluster spans multiple regions.
 5. GoogleCloudSnitch
-- for DSE deployments on Google Cloud Platform across one or more regions. 
-- The region is treated as a datacenter, and the availability zones are treated as racks within the datacenter. 
-- All communication occurs over private IP addresses within the same logical network. 
+	- for DSE deployments on Google Cloud Platform across one or more regions. 
+	- The region is treated as a datacenter, and the availability zones are treated as racks within the datacenter. 
+	- All communication occurs over private IP addresses within the same logical network. 
 6. CloudstackSnitch
-- for Apache Cloudstack environments. B
-- because zone naming is free-form in Apache Cloudstack, this snitch uses the <country> <location> <az> notation.
-
+	- for Apache Cloudstack environments. B
+	- because zone naming is free-form in Apache Cloudstack, this snitch uses 	the <country> <location> <az> notation.
 
 # Tunable consistency
 - you can tune Cassandra's consistency level per-operation, or set it globally for a cluster or datacenter. 
@@ -499,7 +498,7 @@ queries, it is well suited for most any time series based application.
 - get working with CQL - assign types - physical data model
 - optimization tuning
 
-# Methodology
+# Cassandra Methodology
 
 Conceptual & App workflow -> Mapping Conceptual to Logical -> Logical -> Physical -> Optimization tuning
 
@@ -516,3 +515,239 @@ queries should be understood pre modelling
 | ACID compliance | CAP theorem     |
 | Joins & indexes |Denormalization, NO joins     |
 | Referential integrity enforced | Referential integrity NOT enforced    |
+
+
+## Relational Methodology
+
+Conceptual -> Mapping -> Logical -> Normalization -> Queries -> Optimization -> Physical
+
+Queries are in the end of process
+
+# Transactions
+
+- no ACIC support
+- ACIC causes significant performance penalty
+- not required for many use cases
+- cassandra write operation provides ACID:
+	- insert, update, delete are atomic, isolated, durable
+	- tunable consistency for data replicated to nodes
+	- it doesn't handle application integrity constraints
+
+# Batches & lightweight transactions
+
+- be default, cassandra is AP
+- this is tunable
+- can be more like CP
+- can't be CA because you can't sacrifice partition tolerance
+
+
+- joins not implemented because of need to ask other nodes for data = latency
+
+- referential integrity not enforced
+- it would require read before write - performance issues
+- can be enforced in application design
+- OR run DSE analytics with spark to validate duplicate data is consistent
+- Batch operation = write to multiple tables
+- Materialize view feature
+
+# CQL
+
+## Keyspace 
+- top-level container to organize a related set of tables
+- replication parameters required
+- similar to RDBMS schema
+```
+CREATE KEYSPACE killrvideo 
+WITH replication = {'class': 'SimpleStrategy', 
+'replication_factor': 1};
+
+USE killrvideo;
+```
+
+##Table
+- primary key uniquely identifies data row
+- TEXT (varchar) - utf8 encoded string
+- INT - signed 32bit
+- UUID - uuid() function
+- TIMEUUID - now() function, sortable, embeds timestamp value
+- TIMESTAMP - 64bit integer, ISO-1
+
+- COPY - import and export CSV
+```
+$ COPY cycling.cyclist_catgory(col1, col2, col3) 
+FROM 'cyclist_category.csv' WITH DELIMITER='|' AND HEADER=TRUE
+```
+- SELECT 
+	- * is full table scan
+	- LIMIT
+	- columns choosing
+	- COUNT *
+- TRUNCATE table1;
+	- delete only data from table, schema remains
+	- sends JMX command to all nodes to delete SSTables
+	- if any node fails, the command will fail
+- ALTER TABLE table1 - change datatype, add/drop/rename columns, change table props; cannot alter primary key columns
+- SOURCE './mysript.cql'; - execute script
+
+## Terminology
+
+- Data model
+	- abtract model for organizing elements of data
+	- based on queries you want to perform
+- Keyspace
+	- container for replication
+	- tables are inside it
+	- similar to relational schema
+- Table
+	- contain columns
+- Partition
+	- rows stored on a particular node based on partitioning strategy
+- Row	
+	- one or more CQL rows stored together on a partition
+- Partition key - defines node on which data is stored
+- Clustering column - defines order of rows within partition	
+
+### Text types
+- ascii - us-ascii characters
+- text - utf8
+- varchar - utf8
+
+### Integer
+- tinyint
+- smallint
+- int
+- bigint
+- varint
+- decimal
+- float
+- double
+
+### Date
+- date
+- duration
+- time
+- timestamp
+
+### Ids
+- uuid
+- timeuuid
+
+### Special
+- blob - arbitrary bytes
+- boolean - true/false
+- counter - only one counter allowed per table
+- Inet - ipv4 or v6
+
+# Partitions
+
+- partitions are distributed across nodes
+- WHERE on any field other than partition key requires a scan of all partitions on all nodes - inefficient!.
+
+## Clustering columns
+- comes after partition key in primary key clause
+- always use partition key in queries
+
+# Collections
+- retrieved entirely
+- used to store small amount of data
+- SET - unique values, stored unordered, retrieved sorted ordered
+- LIST - can be duplicates, stored in particular order
+- MAP - oredered by unique keys
+- to nest datatypes, you need to use FROZEN
+- FROZEN will serialize multiple components into single value
+- values of FROZEN treated like blobs
+- non-frozen types allow updates to individual fields
+
+# UDT
+- group related fileds of info
+- can be any datatype including collections and other UDTs
+- embed more complex data within a column
+
+# Counters
+
+- stores signed 64bit integer
+- can be incremented/decremented
+- change value with UPDATE
+- table with counter - primary key cols + counter cols, nothing else
+- distributed storing can cause consistency issues with counters
+- default for counter is 0, no insert or assign allowed
+- counter cols can't be indexed or deleted
+
+# UDF and UDA
+- java or javascript
+- use in select, insert, update
+- functions available only in keyspace in which you created them
+- cassandra.yaml: enable_user_defined_functions: true
+
+- user defined aggregate
+- query must include only the aggregate function itself - no additional columns!
+- includes state function (sum of values and counter for calculating average) and final function (avg = sum / counter)
+- state function is called once for each row
+- value returned by state function is a new state
+- after all rows processed. final function is calles
+- aggregation is performed by coordinator!
+```
+CREATE OR REPLACE FUNCTION avgState ( state tuple<int,bigint>, val int ) CALLED ON NULL INPUT RETURNS tuple<int,bigint> LANGUAGE java AS 
+  'if (val !=null) { state.setInt(0, state.getInt(0)+1); state.setLong(1, state.getLong(1)+val.intValue()); } return state;'; 
+
+CREATE OR REPLACE FUNCTION avgFinal ( state tuple<int,bigint> ) CALLED ON NULL INPUT RETURNS double LANGUAGE java AS 
+  'double r = 0; if (state.getInt(0) == 0) return null; r = state.getLong(1); r/= state.getInt(0); return Double.valueOf(r);';
+
+CREATE AGGREGATE IF NOT EXISTS average ( int ) 
+SFUNC avgState STYPE tuple<int,bigint> FINALFUNC avgFinal INITCOND (0,0);  
+```
+
+# Write techniques
+
+- how maintain consistency with duplication
+
+## Logged batches
+- logged batches - insert and update several tables
+```
+BEGIN BATCH
+UPDATE...
+INSERT...
+APPLY BATCH
+```
+- batch is send to coordinator
+- written to log on coordinator and replicas before execution, hints are saved
+- replicas take-over if coordinator fails mid-batch
+- batch succeeds as a whole
+- no isolation - clients may read updated rows before batch completes
+- not intended for bulk loading
+- no ordering for operations in batches - all writes are executed with same timestamp
+
+## Lightweight transactions
+
+- is an ACID transaction at the partition level
+- checks a condition before read/write (e.g. IF NOT EXISTS)
+- performs insert/update/delete if condition is true
+- expensive
+
+# Read techniques
+
+## Secondary index
+
+- separate data structure on node that holds table partition
+- index on column to be queried that is prohibited
+- table structure not affected
+- on any column except counter and static columns
+- where on index column - expensive, scans all nodes
+- where on partition key and index - scans only local index data
+- not for high cardinality columns (columns with values that are very uncommon or unique.)
+- not for frequently updated or deleted columns
+
+## Materialized views
+- separate table built from original one with same data but different primary key
+- primary key for view must include primary key for table
+- only one new column can be added to primary key, not static
+- WHERE section must include PK columns with condition IS NOT NULL
+- can't write to view
+- it's updated asynchronously only when base table is updated
+- cassandra performs read repair for view after updating source table
+
+## Aggregation
+- count, sum, avg, min, max - built-in
+- counters columns
+- on client-side and store in cassandra
+- can be done via spark & solr
