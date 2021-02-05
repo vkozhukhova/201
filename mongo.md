@@ -134,7 +134,7 @@ four essential capabilities in meeting modern application needs:
 - Data locality
 
 ##Availability
-- maintains multiple copies of data using replica sets. U
+- maintains multiple copies of data using replica sets.
 - replica sets are self-healing as failover and recovery is fully automated
 
 ##Workload Isolation
@@ -143,15 +143,12 @@ four essential capabilities in meeting modern application needs:
 
 ##Scalability
 - supports horizontal scaling through sharding. 
-- Sharding automatically partitions and distributes data across multiple
-physical instances called shards. 
+- Sharding automatically partitions and distributes data across multiple physical instances called shards. 
 - Each shard is backed by a replica set to provide always-on availability and workload isolation. 
 - Sharding allows to seamlessly scale the database as their apps grow beyond the hardware limits of a single server, and it does this without adding complexity to the application. 
 - nodes can be added or removed from the cluster in real time, and MongoDB will automatically rebalance the data accordingly, without manual intervention. 
-- Sharding is transparent to applications; whether there is one or a
-thousand shards, the application code for querying MongoDB remains the same. 
-- Applications issue queries to a query router that dispatches the query
-to the appropriate shards.
+- Sharding is transparent to applications; whether there is one or a thousand shards, the application code for querying MongoDB remains the same. 
+- Applications issue queries to a query router that dispatches the query to the appropriate shards.
 
 ##Data Locality
 - zoned sharding allows precise control over where data is physically stored in a cluster. 
@@ -241,10 +238,34 @@ By default, GridFS uses two collections with a bucket named fs:
 - fs.chunks
 
 # Replication
+- single master architecture
+- primary DB
+- secondary  - only copies of primary DB: consistency over availability
+- a replica set = 1 primary server + several secondary backup nodes
+- if primary goes down, one of secondary takes place.
+- auto replication from primary to secondary
+- majority of servers must agree on the primary election, even number of server don't work => at least 3 servers
+- can set an arbiter node (only one) to elect primary if you don't want 3 servers
+- app should know about enugh servers in replica set to be able to reach one to learn who's primary. If you change cluster configureation (e.g. add secondaries) - the app should be provided with these info
+- read from secondaries not recommended
+- DB will go to read-only mode while new primary is elected
+- delayed secondary - can set amount of time between promary and secondary (e.g. 1 hour) to restore 1 hour ago DB copy in case of failure
+
+Sharding:
+
+![](pics/mongo_sharding.png)
+
+- in big cluster there are multiple replica sets
+- each replica set is responsible for some range of data based on some index. That index is necessary to balance data across replica sets
+- you can have multiple app server processes. On these servers, there are mongos processes, that talk to a collection of configuration servers - they know how data is partitioned and which replica set you need.
+- mongos runs a load balancer - can rebalance data based on chosen index (e.g. user id like in picture)
+- auto-sharding sometimes fails - can't rebalance if config servers are down or it even doesn't start if you restart mongos process too often
+- at least 3 config servers prior to 3.2 version, now - config server are part of replica ser, it just has to have a primary config server
+- you nedd to use a shard key with high cardinality
+
 
 - The primary node receives all write operations.
-- A replica set can have only one primary capable of confirming writes with { w: "majority" } write
-concern; 
+- A replica set can have only one primary capable of confirming writes with { w: "majority" } write concern; 
 - another mongod instance may transiently believe itself to also be primary. 
 - The primary records all changes to its data sets in its operation log, i.e. oplog. 
 
@@ -278,3 +299,14 @@ __A priority 0 member__ is a member that cannot become primary and cannot trigge
 - Catalog
 - Personalization
 - Content management
+
+
+# Differences between mongo, cassandra and hbase
+1. Hbase - master-slave architecture, cassandra - all nodes are equal, coordinator node only for query, mongo - single master architecture, primary DB
+2. mongo - document db, hbase and cassandra - column store
+3. cassandra - cql like sql, mongo - javascript shell support & read-only SQL queries via the MongoDB Connector for BI, hbase - no sql
+4. cassandra - AP db, hbase & mongo - CP db
+5. seconadary indexing - yes for mongo, cassandra - only for equality queries, hbase - no
+6. acid: cassandra - atomicity & isolation for single operators, hbase - acid for single row, mongo - multi-document acid with snapshot isolation
+7. replication: cassandra & hbase - selective RF, mongo - master-slave replication
+8. data model: hbase - Tables, Rows, Column Families, Columns, Cells and Versions; cassandra - keyspaces, tables (column families), columns; mongo - collection, document, field 

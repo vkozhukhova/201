@@ -19,4 +19,6 @@
 * [Kibana visualizations](kibana.md)
 * [HBase](hbase.md)
 * [Cassandra](cassandra.md)
+* [Mongo](mongo.md)
+* [Airflow](airflow.md)
 
