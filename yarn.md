@@ -10,10 +10,9 @@
 
 ### Features
 
-* multi-tenancy
+*   multi-tenancy
 
-  Динамическое управление ресурсами: ресурсы кластера используются несколькими механизмами доступа. набор ограничений для предотвращения монополизации ресурсов очереди или кластера одним приложением, пользователем или очередью, чтобы гарантировать, что кластер не перегружен.
-
+    Динамическое управление ресурсами: ресурсы кластера используются несколькими механизмами доступа. набор ограничений для предотвращения монополизации ресурсов очереди или кластера одним приложением, пользователем или очередью, чтобы гарантировать, что кластер не перегружен.
 * scalability - Yarn ResourceManager поддерживает расширение кластера до тысяч нод
 * compatibility - Приложения MapReduce, разработанные для Hadoop 1, работают на YARN без каких-либо сбоев в существующих процессах. Yarn обеспечивает совместимость API с предыдущей стабильной версии платформы Hadoop.
 
@@ -36,7 +35,7 @@ Yarn lauches tasks in containers and makes applications portable
 
 ### RM
 
-knows what resources cluster has and what free storage there is =&gt; yarn knows on which node run tasks.
+knows what resources cluster has and what free storage there is => yarn knows on which node run tasks.
 
 includes:
 
@@ -104,24 +103,24 @@ RM and Node Manager form new generic system for managing apps in distributed man
 we pack app in it, launch it and provide resources on some host to launch it. it makes app portable
 
 * has launch API
-* API is platform agnostic \(not just Java\)
+* API is platform agnostic (not just Java)
 * CLI to lauch process within container
 * security tokens
 * local resources: jars, shared objects, data files
 
 ## App lifecycle
 
-1. App approaches RM \(client submits job to RM\), request of certain amount of disk and memory
+1. App approaches RM (client submits job to RM), request of certain amount of disk and memory
 2. RM checks with Node Managers how many resources they have, receives info from them
-3. RM sends execution to the node. RM launches AM in a container. App master registers request from client and starts process on node. He need to start container to run app \(containers execute tasks\).
+3. RM sends execution to the node. RM launches AM in a container. App master registers request from client and starts process on node. He need to start container to run app (containers execute tasks).
 4. Node manager launches containers. Status of container execution is returned to AM.
 5. AM sends to RM that job is done and resources can be freed up. AM deregisters
 
 ## Yarn logs and statistics
 
-* hadoop.log.dir property or [http://namenode:port/logs](http://namenode:port/logs)
-* `hadoop daemonlog` - set log level for daemon or [http://namenode:port/logLevel](http://namenode:port/logLevel)
-* stacks: [http://namenode:port/stacks](http://namenode:port/stacks)
+* hadoop.log.dir property or [http://namenode:port/logs](http://namenode/:port/logs)
+* `hadoop daemonlog` - set log level for daemon or [http://namenode:port/logLevel](http://namenode/:port/logLevel)
+* stacks: [http://namenode:port/stacks](http://namenode/:port/stacks)
 * ambari, cloudera manager
 * `yarn logs` - by app id, container id
 * `yarn daemonlog` - set log level
@@ -130,7 +129,7 @@ we pack app in it, launch it and provide resources on some host to launch it. it
 
 * **only in local mode**
 
-```text
+```
 dfs.replication="1"
 fs.defaultFS="file:///"
 fs.default.name="file:///"
@@ -158,9 +157,9 @@ Active RM writes it's state to zookeper
 
 ### Many RMs
 
-the configuration \(yarn-site.xml\) used by clients and nodes is expected to list all the RMs.
+the configuration (yarn-site.xml) used by clients and nodes is expected to list all the RMs.
 
-```text
+```
 <property>
   <name>yarn.resourcemanager.ha.enabled</name>
   <value>true</value>
@@ -185,8 +184,8 @@ the configuration \(yarn-site.xml\) used by clients and nodes is expected to lis
 
 The default implementation is org.apache.hadoop.yarn.client.ConfiguredRMFailoverProxyProvider
 
-1. Clients, ApplicationMasters \(AMs\) and NodeManagers \(NMs\) try connecting to the RMs in a round-robin fashion until they hit the Active RM. 
-2. If the Active goes down, they resume the round-robin polling until they hit the "new" Active. 
+1. Clients, ApplicationMasters (AMs) and NodeManagers (NMs) try connecting to the RMs in a round-robin fashion until they hit the Active RM.&#x20;
+2. If the Active goes down, they resume the round-robin polling until they hit the "new" Active.&#x20;
 3. After RM is found, we ask: where can we run, and RM returns all the failed jobs
 
 ## Schedulers
@@ -214,7 +213,7 @@ HDP default scheduler
 * first job allocates all resources
 * second job starts while first is still running, resources that are freed from 1st job are assigned to the second job
 * after a while each job is using half of the resources
-* first gets back all resources when second job is finishing 
+* first gets back all resources when second job is finishing&#x20;
 * so small jobs can have some resources, finish quickly and return resources back
 
 ### Testing in production
@@ -226,19 +225,19 @@ HDP default scheduler
 
 Fair scheduling - это метод распределения ресурсов между заданиями таким образом, чтобы все задания получали в среднем равную долю ресурсов с течением времени. Когда выполняется одно задание, оно использует весь кластер. При отправке других заданий освободившиеся ресурсы назначаются новым заданиям, так что каждое задание получает примерно одинаковое количество процессорного времени. В отличие от стандартного планировщика Hadoop, который формирует очередь заданий, это позволяет коротким заданиям завершаться в разумные сроки, не объедая при этом длинные задания. Это также разумный способ разделить кластер между несколькими пользователями. Наконец, справедливое распределение может также работать с приоритетами заданий - приоритеты используются в качестве весов для определения доли общего вычислительного времени, которое должна получить каждая работа.
 
-CapacityScheduler предназначен для совместного использования большого кластера, предоставляя каждой организации минимальную гарантию кол-ва ресурсов. Основная идея заключается в том, что доступные ресурсы в кластере Hadoop Map-Reduce распределяются между несколькими организациями, которые совместно финансируют кластер на основе вычислительных потребностей. Существует дополнительное преимущество, заключающееся в том, что организация может получить доступ к любому избыточному потенциалу, не используемому другими. Это обеспечивает эластичность для организаций экономически эффективным способом. \([https://docs.arenadata.io/adh/administration/yarn/CapacityScheduler.html](https://docs.arenadata.io/adh/administration/yarn/CapacityScheduler.html)\)
+CapacityScheduler предназначен для совместного использования большого кластера, предоставляя каждой организации минимальную гарантию кол-ва ресурсов. Основная идея заключается в том, что доступные ресурсы в кластере Hadoop Map-Reduce распределяются между несколькими организациями, которые совместно финансируют кластер на основе вычислительных потребностей. Существует дополнительное преимущество, заключающееся в том, что организация может получить доступ к любому избыточному потенциалу, не используемому другими. Это обеспечивает эластичность для организаций экономически эффективным способом. ([https://docs.arenadata.io/adh/administration/yarn/CapacityScheduler.html](https://docs.arenadata.io/adh/administration/yarn/CapacityScheduler.html))
 
 ## Security
 
 * Authentication is the process of ascertaining that somebody really is who he claims to be
 * Authorization refers to rules that determine who is allowed to do what. E.g. Alex may be authorized to create and delete directories, while Nick is only authorized to read
 * In Hadoop security is not trivial field: it requires a lot of efforts and we should be aware of it and plan these activities in advance
-* The Kerberos principals for the ResourceManager and NodeManager must be configured in the yarn-site.xml file. 
-* Make sure that each user who will be running YARN jobs exists on all cluster nodes \(that is, on every node that hosts any YARN daemon\) or each cluster node connected to the same LDAP directory.
+* The Kerberos principals for the ResourceManager and NodeManager must be configured in the yarn-site.xml file.&#x20;
+* Make sure that each user who will be running YARN jobs exists on all cluster nodes (that is, on every node that hosts any YARN daemon) or each cluster node connected to the same LDAP directory.
 
 On every node add these lines to yarn-site.xml
 
-```text
+```
 <property>
   <name>yarn.nodemanager.keytab</name>
   <value>/etc/hadoop/conf/yarn.keytab</value>   <!-- path to the YARN keytab -->
@@ -271,7 +270,7 @@ On every node add these lines to yarn-site.xml
 
 To mapred-site.xml on every node:
 
-```text
+```
 <property>
   <name>mapreduce.jobhistory.address</name>
   <value>host:port</value> <!-- Host and port of the MapReduce Job History Server -->
@@ -292,7 +291,7 @@ To mapred-site.xml on every node:
 
 Create a file called container-executor.cfg for the Linux Container Executor program that contains the following information:
 
-```text
+```
 yarn.nodemanager.local-dirs=<comma-separated list of paths to local NodeManager directories. Should be same values specified in yarn-site.xml. Required to validate paths passed to container-executor in order.>
 yarn.nodemanager.log-dirs=<comma-separated list of paths to local NodeManager log directories. Should be same values specified in yarn-site.xml. Required to set proper permissions on the log files so that they can be written to by the user's containers and read by the NodeManager for log aggregation
 yarn.nodemanager.linux-container-executor.group=yarn<configured value of yarn.nodemanager.linux-container-executor.group>
@@ -324,7 +323,7 @@ min.user.id=1000<prevent other super-users>
 
 * replaced in prod with Spark and Flink
 * Distributed data processing model and execution environment that runs on large clusters of commodity machines
-* Parallel processing of blocks of files stored in HDFS on multiple nodes \(computers in cluster\)
+* Parallel processing of blocks of files stored in HDFS on multiple nodes (computers in cluster)
 * MapReduce is one of the several Yarn applications that runs batchjobs
 
 ### MR concepts
@@ -342,14 +341,14 @@ min.user.id=1000<prevent other super-users>
 **Map task**
 
 * Process input files blocks
-* Produce \(key-value\) pairs
+* Produce (key-value) pairs
 * Executed in parallel
 
 **Reduce task**
 
-* Take \(key-value\) pairs sorted by keys
+* Take (key-value) pairs sorted by keys
 * Combine/aggregate them to produce final result
-* Can be zero, one or more \(executed in parallel\)
+* Can be zero, one or more (executed in parallel)
 
 ### Map reduce architecture
 
@@ -357,7 +356,7 @@ min.user.id=1000<prevent other super-users>
 * MR framework consists of single master JobTracker and one slave TaskTracker per node
 * Master schedules job components tasks on slaves, monitor them and reexecuted failed ones.
 * Slaves execute tasks directed by Master
-* Application submits job \(mapper, reducer, input\) to job tracker
+* Application submits job (mapper, reducer, input) to job tracker
 * Job tracker splits input data into independent chunks
 * Job tracker schedules and monitors various map and reduce tasks and reexecute failed ones
 * Task Tracker execute map and reduce tasks
@@ -366,7 +365,7 @@ min.user.id=1000<prevent other super-users>
 
 * Mapper maps input key/value pairs to a set of intermediate key/value pairs.
 * organize data to further processing of reduce phase
-* map\(inKey, inValue\) -&gt; list\(intermediateKey, intermediateValue\)
+* map(inKey, inValue) -> list(intermediateKey, intermediateValue)
 * inKey = data record
 * inValue = offset of the data record from the begining of the data file
 * output - collection of k/v pairs
@@ -377,12 +376,12 @@ min.user.id=1000<prevent other super-users>
 
 * Identity mapper. Implements mapper and maps inputs directly to outputs
 * Inverse mapper. implements mapper and reverses the key value pair
-* Regex mapper.  implements mapper and generates a \(match, 1\) pair for every regular expression match.
-* Token count mapper. It implements mapper and generates\(Token,1\) pair when the input is tokenized.
+* Regex mapper.  implements mapper and generates a (match, 1) pair for every regular expression match.
+* Token count mapper. It implements mapper and generates(Token,1) pair when the input is tokenized.
 
 ### Reducer
 
-* reduce\(intermediateKey, list\(intermediateValue\)\) -&gt; list\(outKey, outValue\)
+* reduce(intermediateKey, list(intermediateValue)) -> list(outKey, outValue)
 * each reduce function processes the intermediate values for a particular key generated by the map function and generates the output.
 
 `class MyReducer extends MapReduceBase implements Reducer<Text, IntWritable, Text, IntWritable>`
@@ -393,12 +392,11 @@ min.user.id=1000<prevent other super-users>
 
 **Types**
 
-* Identify Reducer. It implements a reducer\[key,value\] and map inputs directly to the outputs.
-* Long sum reducer. It implements a reducer\[key, long writable,\] to get the given key
+* Identify Reducer. It implements a reducer\[key,value] and map inputs directly to the outputs.
+* Long sum reducer. It implements a reducer\[key, long writable,] to get the given key
 
 MR
 
 * handcode each operation
 * no interactive mode
 * no iterative processing
-
