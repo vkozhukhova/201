@@ -13,6 +13,7 @@
 * [Spark part 1](spark101.md)
 * [Spark part 2](spark201.md)
 * [Spark Catalyst](catalyst.md)
+* [Spark.Physical operators](spark.physical-operators.md)
 * [Spark.Other](spark.other.md)
 * [Streaming](streaming101.md)
 * [Spark Streaming part 2](streaming201.md)
