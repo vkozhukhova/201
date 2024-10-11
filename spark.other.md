@@ -352,3 +352,60 @@ The `Sort` operator in the Spark physical plan is used to order the rows of the 
 
 In summary, this operator sorts the dataset by the specified columns (`SalesOrderId`, `Material`, and `SoldTo`) in ascending order, with NULL values placed at the beginning for each column within each partition.
 
+I see the following physical operator in the spark physical plan:\
+\+- BroadcastExchange IdentityBroadcastMode, \[id=#1351]\
+Explain it
+
+#### Explanation of the Spark Physical Operator
+
+**BroadcastExchange**
+
+`BroadcastExchange` is a physical operator in Apache Spark that is used to broadcast a small DataFrame to all nodes in the cluster. This is typically done to optimize join operations where one of the DataFrames is significantly smaller than the other. By broadcasting the smaller DataFrame, Spark avoids the need for shuffling large amounts of data across the network.
+
+**IdentityBroadcastMode**
+
+`IdentityBroadcastMode` is a specific broadcast mode in Spark which implies that the broadcasted data should remain unchanged and be used as-is during the execution of the query. This mode preserves the original structure and content of the broadcasted DataFrame without any transformation or modification.
+
+**\[id=#1351]**
+
+The `[id=#1351]` part is an identifier used internally by Spark to uniquely identify this particular instance of the `BroadcastExchange` operator within the execution plan. This helps in tracking and debugging the execution process.
+
+#### Summary
+
+The operator `+- BroadcastExchange IdentityBroadcastMode, [id=#1351]` in your Spark physical plan indicates that:
+
+* A small DataFrame is being broadcasted to all nodes in the cluster.
+* The broadcast mode is `IdentityBroadcastMode`, meaning the data is used in its original form.
+* The unique identifier for this operation within the plan is `#1351`.
+
+Explain +- BroadcastExchange HashedRelationBroadcastMode(List(input\[0, string, true])), \[id=#1475]
+
+#### Explanation of the Spark Physical Operator
+
+**BroadcastExchange**
+
+`BroadcastExchange` is a physical operator in Apache Spark that broadcasts a small DataFrame to all nodes in the cluster to optimize join operations. When one DataFrame is significantly smaller than the other, broadcasting the smaller DataFrame helps avoid shuffling large amounts of data across the network.
+
+**HashedRelationBroadcastMode**
+
+`HashedRelationBroadcastMode` is a broadcast mode in Spark that uses hashed relations. This mode creates a hash map from the broadcasted DataFrame, where the keys are the values of the specified columns. This allows for fast lookups during join operations.
+
+**List(input\[0, string, true])**
+
+This part indicates the schema of the broadcasted data, where:
+
+* `input[0]` refers to the first column of the DataFrame.
+* `string` indicates the data type of the column.
+* `true` indicates that the column allows null values.
+
+**\[id=#1475]**
+
+The `[id=#1475]` part is an identifier used internally by Spark to uniquely identify this particular instance of the `BroadcastExchange` operator within the execution plan. This helps in tracking and debugging the execution process.
+
+#### Summary
+
+The operator `+- BroadcastExchange HashedRelationBroadcastMode(List(input[0, string, true])), [id=#1475]` in your Spark physical plan indicates that:
+
+* A small DataFrame is being broadcasted using a hashed relation broadcast mode.
+* The broadcasted DataFrame has a schema where the first column is a string, and it allows null values.
+* The unique identifier for this operation within the plan is `#1475`.
