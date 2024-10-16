@@ -29,7 +29,28 @@ This overhead ensures smooth operation and prevents out-of-memory errors during 
 
 The property `spark.kubernetes.memoryOverhead` in Apache Spark specifies the amount of off-heap memory (in megabytes) to be allocated per executor pod. This memory is used for overhead such as JVM overheads, interned strings, other native overheads, and user code execution. It helps prevent out-of-memory errors by ensuring there is sufficient memory available beyond the JVM heap.
 
+Example:
 
+1. **Total Executor Memory**:
+   * `spark.executor.memory` = 512MB
+   * `spark.executor.memoryOverhead` is set to a minimum of 384MB (since 0.2 \* 512MB is less than 384MB)
+   * Total memory for the executor = 512MB + 384MB = 896MB
+2. **Available JVM Heap Space**:
+   * JVM heap space = `spark.executor.memory` = 512MB
+3. **Unified Memory Pool Size**:
+   * `spark.memory.fraction` = 0.6
+   * Unified memory pool = 0.6 \* (512MB - 300MB)
+   * 512MB - 300MB = 212MB
+   * Unified memory pool = 0.6 \* 212MB = 127.2MB
+4. **Storage Memory**:
+   * `spark.memory.storageFraction` = 0.5
+   * Storage memory = 0.5 \* 127.2MB = 63.6MB
+
+So, the correct calculations are:
+
+* Available JVM heap space: 512MB
+* Unified memory pool (execution and storage): 127.2MB
+* Storage memory: 63.6MB
 
 The number of SQL queries shown on the SQL tab in the Spark UI depends on:
 
