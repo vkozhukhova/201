@@ -52,6 +52,15 @@ So, the correct calculations are:
 * Unified memory pool (execution and storage): 127.2MB
 * Storage memory: 63.6MB
 
+Memory overhead in Spark is used to account for additional memory usage that is not directly related to storing RDDs (Resilient Distributed Datasets) or performing computations. This includes:
+
+* **JVM Overhead**: Memory used by the JVM for tasks like garbage collection, thread stacks, and other JVM internals.
+* **User Data Structures**: Memory used by data structures and objects created by user code.
+* **Network Buffers**: Memory required for network communication between nodes.
+* **Serialization Buffers**: Memory for serializing and deserializing objects during shuffling and other operations.
+
+This ensures that there is enough memory available for these additional tasks, preventing out-of-memory errors during execution.
+
 The number of SQL queries shown on the SQL tab in the Spark UI depends on:
 
 * **Number of Actions**: Each action (e.g., `collect()`, `count()`, `save()`, etc.) in your Spark application will typically result in a separate SQL query.
