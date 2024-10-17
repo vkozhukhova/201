@@ -1,5 +1,11 @@
 # Spark.Jobs
 
+Based on the information extracted from the Apache Spark repository, the main job types in Spark are:
+
+* **SQL Jobs**: Jobs that involve SQL queries executed using Spark SQL.
+* **Non-SQL Jobs**: Jobs that involve operations on RDDs (Resilient Distributed Datasets).
+* **Hive Jobs**: Specific to operations using the Hive Thrift server and CLI services.
+
 In Apache Spark, some jobs have associated SQL queries while others do not due to the following reasons:
 
 1. **Job Type**: Jobs triggered by SQL queries through Spark SQL will have an associated SQL query. Other jobs, like those triggered by direct RDD operations, will not have an associated SQL query.
