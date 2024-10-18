@@ -14,6 +14,7 @@
 * [Spark part 2](spark201.md)
 * [Spark Catalyst](catalyst.md)
 * [Spark.Physical operators](spark.physical-operators.md)
+* [Spark. Environment](spark.-environment.md)
 * [Spark.Jobs](spark.jobs.md)
 * [Spark.Other](spark.other.md)
 * [Streaming](streaming101.md)
