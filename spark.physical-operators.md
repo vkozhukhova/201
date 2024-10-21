@@ -183,6 +183,26 @@ The `Exchange` operator in this part of the Spark plan is redistributing the dat
 * Falls back to building new hash maps for remaining input rows when memory is exceeded.
 * Supports code generation.
 
+In Spark SQL, the `HashAggregateExec` operator uses a hash-based aggregation method to process data. Here's how it works in detail:
+
+1. **Memory Management with HashAggregateExec:**
+   * The `HashAggregateExec` operator uses an in-memory hash map to store groups and their corresponding aggregation buffers.
+   * This hash map is backed by an `UnsafeFixedWidthAggregationMap`, which stores data in a compact binary format to optimize memory usage.
+2. **Tracking Memory Usage:**
+   * The operator continuously monitors the memory usage of the hash map. It tracks the total number of bytes consumed by the hash map.
+   * This is crucial because the available memory in the JVM is limited, and exceeding it can cause out-of-memory errors.
+3. **Fallback Mechanism:**
+   * If the memory usage exceeds a predefined threshold, the `HashAggregateExec` operator triggers a fallback mechanism to prevent memory overflow.
+   * The fallback mechanism switches from hash-based aggregation to sort-based aggregation.
+4. **Sort-Based Aggregation:**
+   * In sort-based aggregation, the remaining input rows are sorted and merged in batches.
+   * This method is less memory-intensive because it processes data in a more controlled manner, albeit at the cost of additional CPU and I/O overhead.
+5. **Configuration:**
+   * The memory threshold for triggering the fallback can be configured via Spark SQL settings.
+   * For example, you can set the property `spark.sql.execution.sortBased.fallbackThreshold` to control when the fallback occurs based on memory usage.
+
+By tracking memory usage by byte size and having a fallback mechanism, Spark SQL ensures efficient memory management and prevents crashes due to out-of-memory errors during aggregation operations.
+
 **ObjectHashAggregate:**
 
 * Uses safe rows to handle aggregation states involving JVM objects.
