@@ -12,6 +12,7 @@
 * [Hive part 2](hive201.md)
 * [Spark part 1](spark101.md)
 * [Spark part 2](spark201.md)
+* [Delta Lake](delta-lake.md)
 * [Spark Catalyst](catalyst.md)
 * [Spark.Physical operators](spark.physical-operators.md)
 * [Spark. Environment](spark.-environment.md)
