@@ -171,3 +171,36 @@ The provided part of the Spark plan involves the `Exchange` operator. Here’s a
 #### Summary
 
 The `Exchange` operator in this part of the Spark plan is redistributing the data across 32 partitions using a hash-based partitioning strategy based on the `SalesOrderId`, `Material`, and `SoldTo` columns. This ensures that rows with the same key values end up in the same partition, which is necessary for subsequent operations like aggregations or joins.
+
+
+
+#### Differences between `HashAggregate` and `ObjectHashAggregate` in Spark SQL
+
+**HashAggregate:**
+
+* Uses `UnsafeRow` as aggregation buffer.
+* Tracks memory usage by byte size to decide when to fall back to sort-based aggregation.
+* Falls back to building new hash maps for remaining input rows when memory is exceeded.
+* Supports code generation.
+
+**ObjectHashAggregate:**
+
+* Uses safe rows to handle aggregation states involving JVM objects.
+* Tracks the number of entries in the hash map rather than byte size.
+* Falls back to sort-based aggregation, feeding all remaining input rows into external sorters.
+* Does not support code generation.
+
+Safe rows and unsafe rows are two types of data structures used in Spark SQL for storing row data. Here are the key differences:
+
+* Safe Rows:
+  * Implemented as `GenericInternalRow`.
+  * Uses standard Java objects for data storage.
+  * Type-safe and can handle arbitrary JVM objects.
+  * Easier to work with and debug, but slower due to higher memory consumption and garbage collection overhead.
+* Unsafe Rows:
+  * Implemented as `UnsafeRow`.
+  * Uses off-heap memory for data storage.
+  * Optimized for performance with a compact binary format.
+  * Faster and more memory-efficient but less type-safe and can cause JVM crashes if used improperly.
+
+\
