@@ -46,3 +46,9 @@ In the context of Spark, "remote" during shuffle refers to data that is fetched 
 
 * During the shuffle phase, the executor writes data that needs to be shuffled to its local disk.
 * Other executors then read this data from the local disk of the executor that wrote it.
+
+Here are some common reasons why Spark might skip stages during execution:
+
+* **RDD Caching**: If the RDDs in the stage have already been computed and cached, Spark can skip the recomputation.
+* **Failure and Retry**: Spark can skip stages if it detects that recomputation is unnecessary due to job failures and retries.
+* **Data Locality**: Spark might skip stages if the data is already available in the desired location, avoiding unnecessary computation.
